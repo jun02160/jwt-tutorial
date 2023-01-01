@@ -24,22 +24,25 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests((authz) -> authz
+        http
+                .httpBasic().disable()
+                .csrf().disable()
+                .authorizeHttpRequests((authz) -> authz
                 .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
                 .formLogin().loginPage("/login").permitAll()
                 .and()
-                .logout().logoutSuccessUrl("/")
-//                .and()
-//                .rememberMe().userDetailsService().tokenRepository(tokenRepository())
-                .and().build();
+                .logout().logoutSuccessUrl("/");//                .and()
+//                .rememberMe().userDetailsService().tokenRepository(tokenRepository();
 
+        return http.build();
     }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
+
 }
