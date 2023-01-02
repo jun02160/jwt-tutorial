@@ -7,6 +7,7 @@ import jjun.server.jwttutorial.entity.User;
 import lombok.*;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 @Builder
@@ -36,7 +37,8 @@ public class UserDto {
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .authorityDtoSet(user.getAuthorities().stream()
-                        .map(authority -> AuthorityDto.builder().authorityName()).build())
+                        .map(authority -> AuthorityDto.builder().authorityName(authority.getAuthorityName()).build())
+                        .collect(Collectors.toSet()))
                 .build();
 
     }
