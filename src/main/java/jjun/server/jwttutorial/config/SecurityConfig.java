@@ -19,10 +19,13 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity   // 기본적인 Web 보안 활성화
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CorsFilter corsFilter;
+
+    public SecurityConfig(CorsFilter corsFilter) {
+        this.corsFilter = corsFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
