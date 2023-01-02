@@ -1,5 +1,9 @@
 package jjun.server.jwttutorial.config;
 
+import jjun.server.jwttutorial.jwt.JwtAccessDeniedHandler;
+import jjun.server.jwttutorial.jwt.JwtAuthenticationEntryPoint;
+import jjun.server.jwttutorial.jwt.JwtSecurityConfig;
+import jjun.server.jwttutorial.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +25,16 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final TokenProvider tokenProvider;
     private final CorsFilter corsFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    public SecurityConfig(CorsFilter corsFilter) {
+    public SecurityConfig(TokenProvider tokenProvider, CorsFilter corsFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+        this.tokenProvider = tokenProvider;
         this.corsFilter = corsFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
 
     @Bean
@@ -44,11 +54,12 @@ public class SecurityConfig {
 
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
-//                .exceptionHandling()
-//                .authenticationEntryPoint()
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
 
                 // enable h2-console
-//                .and()
+                .and()
                 .headers()
                 .frameOptions()
                 .sameOrigin()
@@ -62,7 +73,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/test").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+
+                .and()
+                .apply(new JwtSecurityConfig(tokenProvider));
 
         return http.build();
     }
