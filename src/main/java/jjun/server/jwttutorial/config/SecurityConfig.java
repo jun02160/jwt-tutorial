@@ -25,6 +25,7 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // jwt 디렉토리에 생성한 클래스들 SecurityConfig에 추가
     private final TokenProvider tokenProvider;
     private final CorsFilter corsFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -37,6 +38,7 @@ public class SecurityConfig {
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
 
+    // 비밀번호 암호화
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -54,6 +56,7 @@ public class SecurityConfig {
 
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
+                // Exception Handling 시, 이전에 생성했던 클래스를 추가하여 Exception 상황에 대한 커스텀 적용
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
@@ -69,14 +72,15 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
+                // token이 없는 상태에서 요청되는 로그인, 회원가입 API는 permitAll로 설정
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/test").permitAll()
+                .requestMatchers("/api/test", "/api/authenticate", "/api/signup").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
 
                 .and()
-                .apply(new JwtSecurityConfig(tokenProvider));
+                .apply(new JwtSecurityConfig(tokenProvider));   // addFilterBefore로 등록했던 JwtSecurityConfig 클래스 적용 추가
 
         return http.build();
     }
