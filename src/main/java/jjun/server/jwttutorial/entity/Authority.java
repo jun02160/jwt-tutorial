@@ -1,6 +1,5 @@
 package jjun.server.jwttutorial.entity;
 
-
 import lombok.*;
 
 import jakarta.persistence.Column;
@@ -11,7 +10,8 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "authority")
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
