@@ -1,0 +1,35 @@
+spring:
+
+  h2:
+    console:
+      enabled: true
+#      settings:
+#        web-allow-others: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+#    url: jdbc:h2:tcp://localhost/~/test;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true   # SQL문을 가독성 있게 표현
+        show_sql: true  # Hibernate 가 실행한 모든 SQL 문 콘솔로 출력
+#        globally_quoted_identifiers: true
+#        use_sql_comments: true   # 디버깅 정보 출력
+    defer-datasource-initialization: true
+
+logging:
+  level:
+    jjun.server: DEBUG   # 로깅 레벨 설정
+
+jwt:
+  header: Authorization
+  secret: c2Rza2xmbWdrZWx3bmdsa25scWV3ZmtsZHM7ZjtsZ3FsZHNsa3NsZnNkZmtsbmxrd3Jyazt3cW5yZgoK
+  token-validity-in-seconds: 86400
