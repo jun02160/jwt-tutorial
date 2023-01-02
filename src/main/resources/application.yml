@@ -25,3 +25,8 @@ spring:
 logging:
   level:
     jjun.server: DEBUG   # 로깅 레벨 설정
+
+jwt:
+  header: Authorization
+  secret: c2Rza2xmbWdrZWx3bmdsa25scWV3ZmtsZHM7ZjtsZ3FsZHNsa3NsZnNkZmtsbmxrd3Jyazt3cW5yZgoK
+  token-validity-in-seconds: 86400

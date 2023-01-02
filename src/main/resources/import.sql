@@ -1,7 +1,7 @@
-INSERT INTO "user" (USER_ID, USERNAME, PASSWORD, NICKNAME, ACTIVATED)
-VALUES (1, 'admin', '$afjlkfnlkdsnfqlkwnfq', 'nick', 1);
-INSERT INTO "user" (USER_ID, username, password, nickname, activated)
-values (2, 'user', '$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC', 'user', 1);
+INSERT INTO USERS (USERNAME, PASSWORD, NICKNAME, ACTIVATED)
+VALUES ('admin', '$afjlkfnlkdsnfqlkwnfq', 'nick', 1);
+INSERT INTO USERS (username, password, nickname, activated)
+values ('user', '$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC', 'user', 1);
 
 INSERT INTO AUTHORITY (AUTHORITY_NAME) values ('ROLE_USER');
 INSERT INTO AUTHORITY (AUTHORITY_NAME) values ('ROLE_ADMIN');
