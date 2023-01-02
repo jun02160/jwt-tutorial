@@ -1,5 +1,9 @@
 package jjun.server.jwttutorial.config;
 
+import jjun.server.jwttutorial.jwt.JwtAccessDeniedHandler;
+import jjun.server.jwttutorial.jwt.JwtAuthenticationEntryPoint;
+import jjun.server.jwttutorial.jwt.JwtSecurityConfig;
+import jjun.server.jwttutorial.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +23,22 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity   // 기본적인 Web 보안 활성화
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
+    // jwt 디렉토리에 생성한 클래스들 SecurityConfig에 추가
+    private final TokenProvider tokenProvider;
     private final CorsFilter corsFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
+    public SecurityConfig(TokenProvider tokenProvider, CorsFilter corsFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+        this.tokenProvider = tokenProvider;
+        this.corsFilter = corsFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+    }
+
+    // 비밀번호 암호화
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -41,11 +56,13 @@ public class SecurityConfig {
 
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
-//                .exceptionHandling()
-//                .authenticationEntryPoint()
+                // Exception Handling 시, 이전에 생성했던 클래스를 추가하여 Exception 상황에 대한 커스텀 적용
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
 
                 // enable h2-console
-//                .and()
+                .and()
                 .headers()
                 .frameOptions()
                 .sameOrigin()
@@ -55,11 +72,15 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
+                // token이 없는 상태에서 요청되는 로그인, 회원가입 API는 permitAll로 설정
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/test").permitAll()
+                .requestMatchers("/api/test", "/api/authenticate", "/api/signup").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+
+                .and()
+                .apply(new JwtSecurityConfig(tokenProvider));   // addFilterBefore로 등록했던 JwtSecurityConfig 클래스 적용 추가
 
         return http.build();
     }

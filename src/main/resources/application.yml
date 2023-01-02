@@ -3,13 +3,14 @@ spring:
   h2:
     console:
       enabled: true
+      settings:
+        web-allow-others: true
 
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;NON_KEYWORDS=USER
     driver-class-name: org.h2.Driver
     username: sa
-    hikari:
-      password:
+    password:
 
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -23,4 +24,9 @@ spring:
 
 logging:
   level:
-    jjun.server: DEBUG   # ?? ?? ??
+    jjun.server: DEBUG   # 로깅 레벨 설정
+
+jwt:
+  header: Authorization
+  secret: c2Rza2xmbWdrZWx3bmdsa25scWV3ZmtsZHM7ZjtsZ3FsZHNsa3NsZnNkZmtsbmxrd3Jyazt3cW5yZgoK
+  token-validity-in-seconds: 86400
