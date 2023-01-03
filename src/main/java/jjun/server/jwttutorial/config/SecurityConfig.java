@@ -75,7 +75,7 @@ public class SecurityConfig {
                 // token이 없는 상태에서 요청되는 로그인, 회원가입 API는 permitAll로 설정
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
+                .requestMatchers("/api/hello", "/api/authenticate", "/api/signup", "/auth/**").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
 
