@@ -18,4 +18,3 @@ public class KakaoTokenDto {
     private int refresh_token_expires_in;
     private String scope;
 }
-K

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
+@Entity    // @Entity 어노테이션: 자동으로 JPA 연동
 @Table(name = "`user`")
 @Getter
 @Setter
