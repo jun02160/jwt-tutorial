@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity    // @Entity 어노테이션: 자동으로 JPA 연동
-@Table(name = "`user`")
+@Table(name = "`USER`")
 @Getter
 @Setter
 @Builder
