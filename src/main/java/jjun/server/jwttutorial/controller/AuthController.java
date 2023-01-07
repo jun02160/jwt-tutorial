@@ -3,10 +3,12 @@ package jjun.server.jwttutorial.controller;
 import jakarta.validation.Valid;
 import jjun.server.jwttutorial.dto.LoginDto;
 import jjun.server.jwttutorial.dto.TokenDto;
+import jjun.server.jwttutorial.dto.token.TokenRequestDto;
 import jjun.server.jwttutorial.dto.token.TokenResponseDto;
 import jjun.server.jwttutorial.entity.User;
 import jjun.server.jwttutorial.jwt.JwtFilter;
 import jjun.server.jwttutorial.jwt.TokenProvider;
+import jjun.server.jwttutorial.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class AuthController {
 
-    private final TokenProvider tokenProvider;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthService authService;
 
     /**
      *  로그인 API
@@ -39,18 +40,22 @@ public class AuthController {
      */
     @PostMapping("/authenticate")
     public ResponseEntity<TokenResponseDto> authorize(@Valid @RequestBody LoginDto loginDto) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);   // 이때 커스텀한 UserDetailsService 의 loadByUsername 메소드가 실행
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        TokenResponseDto jwt = tokenProvider.createToken(authentication);   // JWT Token 생성
+        TokenResponseDto jwt = authService.authenticate(loginDto);   // JWT Token 생성
 
         // Response Header 에 추가
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
 
         return new ResponseEntity<>(jwt, httpHeaders, HttpStatus.OK);   // ResponseBody 에도 실어서 응답을 반환
+    }
+
+    /**
+     * 토큰 재발급 API
+     * - Access Token, Refresh Token String 을 담고 있는 TokenRequestDto 를 파라미터로 넘겨줌
+     */
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponseDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
     }
 }

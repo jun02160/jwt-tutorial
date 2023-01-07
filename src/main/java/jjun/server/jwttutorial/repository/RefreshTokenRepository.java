@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     // 토큰 존재 유무 확인
-    Optional<RefreshToken> findByKey(Long key);
-    Optional<RefreshToken> findByToken(String token);
+    Optional<RefreshToken> findByKey(String key);
+    Optional<RefreshToken> findByValue(String token);
 }

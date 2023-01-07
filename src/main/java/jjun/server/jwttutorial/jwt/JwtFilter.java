@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -16,7 +17,14 @@ import java.io.IOException;
 
 /**
  * JWT를 위한 커스텀 필터 생성
+ * OncePerRequestFilter 과 차이점 비교: https://velog.io/@chrkb1569/OncePerRequestFilter와-GenericFilterBean
+ *
+ * 모든 Request 요청은 이 필터를 거치므로 토큰 정보가 없거나 유효하지 않으면 정상적으로 수행되지 않는다.
+ * 요청이 정상적으로 Controller 까지 도착했다면 SecurityContext 에 유저의 정보가 존재한다는 것이 보장된다.
+ * 이때 DB 에 유저정보가 있는지 직접 조회한 것이 아니라 토큰에 실린 유저 정보를 조회한 것이므로, 탈퇴 등에 의해 DB에서 유저가 삭제된 경우는 Service 단에서 따로 고려를 해줘야 한다.
+ *
  */
+@RequiredArgsConstructor
 public class JwtFilter extends GenericFilterBean {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
@@ -24,11 +32,7 @@ public class JwtFilter extends GenericFilterBean {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
-    private TokenProvider tokenProvider;
-
-    public JwtFilter(TokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
-    }
+    private final TokenProvider tokenProvider;
 
     /**
      * 실제 필터링 로직 doFilter 메서드에 구현
