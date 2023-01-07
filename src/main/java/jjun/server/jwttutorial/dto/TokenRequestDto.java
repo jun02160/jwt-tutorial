@@ -1,4 +1,4 @@
-package jjun.server.jwttutorial.dto.token;
+package jjun.server.jwttutorial.dto;
 
 import lombok.Builder;
 import lombok.Data;

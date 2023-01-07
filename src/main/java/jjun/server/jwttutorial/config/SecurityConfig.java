@@ -44,6 +44,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     /**
      * Spring Security 5.7x 부터 WebSecurityConfigureAdapter 는 Deprecated.
      * -> SecurityFilterChain, WebSecurityCustomizer 를 상황에 따라 빈으로 등록해 사용한다.
@@ -90,8 +91,8 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-
-                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+                .requestMatchers("/h2-console/**", "/favicon.ico")
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
 }
