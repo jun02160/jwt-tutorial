@@ -44,6 +44,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     /**
      * Spring Security 5.7x 부터 WebSecurityConfigureAdapter 는 Deprecated.
      * -> SecurityFilterChain, WebSecurityCustomizer 를 상황에 따라 빈으로 등록해 사용한다.
@@ -56,6 +57,7 @@ public class SecurityConfig {
 
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
+                // JWT 토큰 에외처리
                 // Exception Handling 시, 이전에 생성했던 클래스를 추가하여 Exception 상황에 대한 커스텀 적용
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -67,15 +69,16 @@ public class SecurityConfig {
                 .frameOptions()
                 .sameOrigin()
 
-                // 세션을 사용하지 않으므로 STATELESS 설정
+                // 세션을 사용하지 않으므로 STATELESS 설정 (Security는 기본적으노 세션 방식을 사용)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
+                // 접근 권한 설정
                 // token이 없는 상태에서 요청되는 로그인, 회원가입 API는 permitAll로 설정
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
+                .requestMatchers("/", "/h2/**", "/api/hello", "/api/authenticate", "/api/signup", "/auth/**").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
 
@@ -88,8 +91,8 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-
-                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+                .requestMatchers("/h2-console/**", "/favicon.ico")
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
 }

@@ -1,6 +1,7 @@
 package jjun.server.jwttutorial.controller;
 
 import jakarta.validation.Valid;
+import jjun.server.jwttutorial.config.BaseResponse;
 import jjun.server.jwttutorial.dto.UserDto;
 import jjun.server.jwttutorial.entity.User;
 import jjun.server.jwttutorial.service.UserService;
@@ -32,13 +33,13 @@ public class UserController {
 
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")  // USER, ADMIN 권한 모두 허용
-    public ResponseEntity<User> getMyUserInfo() {
-        return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
+    public BaseResponse<User> getMyUserInfo() {
+        return new BaseResponse<>(userService.getMyUserWithAuthorities().get());
     }
 
     @GetMapping("/user/{username}")
     @PreAuthorize("hasAnyRole('ADMIN')")   // ADMIN 권한만 허용 -> API를 호출 가능한 권한을 제한함
-    public ResponseEntity<User> getUserInfo(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getUserWithAuthorities(username).get());
+    public BaseResponse<User> getUserInfo(@PathVariable String username) {
+        return new BaseResponse<>(userService.getUserWithAuthorities(username).get());
     }
 }
