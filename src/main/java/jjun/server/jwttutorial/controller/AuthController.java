@@ -3,20 +3,13 @@ package jjun.server.jwttutorial.controller;
 import jakarta.validation.Valid;
 import jjun.server.jwttutorial.dto.LoginDto;
 import jjun.server.jwttutorial.dto.TokenDto;
-import jjun.server.jwttutorial.dto.token.TokenRequestDto;
-import jjun.server.jwttutorial.dto.token.TokenResponseDto;
-import jjun.server.jwttutorial.entity.User;
+import jjun.server.jwttutorial.dto.TokenRequestDto;
 import jjun.server.jwttutorial.jwt.JwtFilter;
-import jjun.server.jwttutorial.jwt.TokenProvider;
 import jjun.server.jwttutorial.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,9 +32,9 @@ public class AuthController {
      *  - Authentication 객체를 createToken() 메소드를 통해 JWT Token 발급
      */
     @PostMapping("/authenticate")
-    public ResponseEntity<TokenResponseDto> authorize(@Valid @RequestBody LoginDto loginDto) {
+    public ResponseEntity<TokenDto> authorize(@Valid @RequestBody LoginDto loginDto) {
 
-        TokenResponseDto jwt = authService.authenticate(loginDto);   // JWT Token 생성
+        TokenDto jwt = authService.authenticate(loginDto);   // JWT Token 생성
 
         // Response Header 에 추가
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -55,7 +48,7 @@ public class AuthController {
      * - Access Token, Refresh Token String 을 담고 있는 TokenRequestDto 를 파라미터로 넘겨줌
      */
     @PostMapping("/reissue")
-    public ResponseEntity<TokenResponseDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+    public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(authService.reissue(tokenRequestDto));
     }
 }

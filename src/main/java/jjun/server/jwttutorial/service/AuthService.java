@@ -2,9 +2,8 @@ package jjun.server.jwttutorial.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jjun.server.jwttutorial.dto.LoginDto;
-import jjun.server.jwttutorial.dto.UserDto;
-import jjun.server.jwttutorial.dto.token.TokenRequestDto;
-import jjun.server.jwttutorial.dto.token.TokenResponseDto;
+import jjun.server.jwttutorial.dto.TokenDto;
+import jjun.server.jwttutorial.dto.TokenRequestDto;
 import jjun.server.jwttutorial.entity.Account;
 import jjun.server.jwttutorial.entity.RefreshToken;
 import jjun.server.jwttutorial.jwt.TokenProvider;
@@ -44,7 +43,7 @@ public class AuthService {
      * 로그인 시 Token 을 발급해서 리턴하는 메소드
      */
     @Transactional
-    public TokenResponseDto authenticate(LoginDto loginDto) {
+    public TokenDto authenticate(LoginDto loginDto) {
         // 1. Login 을 시도한 ID/PW 를 기반으로 AuthenticationToken 생성
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
@@ -53,7 +52,7 @@ public class AuthService {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);   // 이때 커스텀한 UserDetailsService 의 loadByUsername 메소드가 실행
 
         // 3. 인증 정보를 기반으로 JWT 토큰 생성
-        TokenResponseDto tokenDto = tokenProvider.createToken(authentication);
+        TokenDto tokenDto = tokenProvider.createToken(authentication);
 
         // 4. Refresh Token 저장
         RefreshToken refreshToken = RefreshToken.builder()
@@ -69,7 +68,8 @@ public class AuthService {
     /**
      * 토큰 만료 시 재발급하는 메소드
      */
-    @Transactional TokenResponseDto reissue(TokenRequestDto tokenRequestDto) {
+    @Transactional
+    public TokenDto reissue(TokenRequestDto tokenRequestDto) {
         // 1. Refresh Token 검증
         if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
             log.debug("Refresh Token 이 유효하지 않습니다.");
@@ -88,7 +88,7 @@ public class AuthService {
         }
 
         // 5. 새로운 토큰 생성
-        TokenResponseDto tokenDto = tokenProvider.createToken(authentication);
+        TokenDto tokenDto = tokenProvider.createToken(authentication);
 
         // 6. Repository 정보 업데이트
         RefreshToken newRefreshToken = refreshToken.updateToken(tokenDto.getRefreshToken());

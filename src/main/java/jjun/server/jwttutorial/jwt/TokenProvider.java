@@ -3,11 +3,9 @@ package jjun.server.jwttutorial.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import jjun.server.jwttutorial.dto.TokenDto;
-import jjun.server.jwttutorial.dto.token.TokenResponseDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,34 +23,34 @@ import java.util.stream.Collectors;
 /**
  * JWT 토큰에 관련된 암호화, 복호화, 검증 로직이 이루어지는 클래스
  */
+@Slf4j
 @Component
-public class TokenProvider implements InitializingBean {
+public class TokenProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;   // Access Token 만료 기한: 1일
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // Refresh Token 만료 기한: 7일
-    private final String secret;
 //    private final long tokenValidityInMilliseconds;
     private Key key;
 
     public TokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInMilliseconds) {
-        this.secret = secret;   // JWT 토큰 생성 시 사용될 암호화 키 값 생성자에서 지정
+            @Value("${jwt.secret}") String secretKey) {
+           // JWT 토큰 생성 시 사용될 암호화 키 값 생성자에서 지정
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
 //        this.tokenValidityInMilliseconds = tokenValidityInMilliseconds * 1000;   // 만료기간 하루로 설정
     }
 
     // bean 생성 이후 주입을 받은 후, secret 값을 Base64로 decode 한 후에 key 변수에 넣어주는 작업
-    @Override
-    public void afterPropertiesSet() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+//    @Override
+//    public void afterPropertiesSet() {
+//        byte[] keyBytes = Decoders.BASE64.decode(secret);
+//        this.key = Keys.hmacShaKeyFor(keyBytes);
+//    }
 
     // Authentication 객체의 권한 정보를 이용해서 토큰을 생성하는 createToken 메소드
-    public TokenResponseDto createToken(Authentication authentication) {
+    public TokenDto createToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -74,7 +72,7 @@ public class TokenProvider implements InitializingBean {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
-        return TokenResponseDto.builder()
+        return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .accessTokenExpiresIn(accessTokenExpireTime.getTime())
@@ -109,13 +107,13 @@ public class TokenProvider implements InitializingBean {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);   // Jwts 모듈이 알아서 Exception 을 던져줌
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            logger.info("잘못된 JWT 서명입니다.");
+            log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
-            logger.info("만료된 JWT 토큰입니다.");
+            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            logger.info("지원하지 않는 JWT 토큰입니다.");
+            log.info("지원하지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
-            logger.info("JWT 토큰이 잘못되었습니다.");
+            log.info("JWT 토큰이 잘못되었습니다.");
         }
 
         return false;
