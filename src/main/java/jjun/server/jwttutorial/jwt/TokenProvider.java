@@ -5,6 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import jjun.server.jwttutorial.dto.TokenDto;
+import jjun.server.jwttutorial.entity.Authority;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -79,6 +80,38 @@ public class TokenProvider {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    public TokenDto createToken(String email) {
+        String authorities = Authority.builder()
+                .authorityName("ROLE_USER")
+                .build().toString();
+
+        long now = (new Date()).getTime();   // 토큰의 만료 시간 설정
+        Date accessTokenExpireTime = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
+        // JWT Access Token 생성 -> 유저와 권한 정보를 담는다.
+        String accessToken = Jwts.builder()
+                .setSubject(email)    // payload "sub" : "name"
+                .claim(AUTHORITIES_KEY, authorities)     // payload "auth" : "ROLE_USER"
+                .signWith(key, SignatureAlgorithm.HS512) // header "alg" : HS512 (해싱 알고리즘)
+                .setExpiration(accessTokenExpireTime)    // payload "exp" (10자리)
+                .compact();
+
+        // JWT Refresh Token 생성 -> 만료일자 외에 아무 정보도 담지 않는다.
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(accessTokenExpireTime.getTime())
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+
 
     // Token 에 담겨 있는 정보를 이용해 Authentication 객체를 리턴하는 메소드
     public Authentication getAuthentication(String accessToken) {   // Access Token 에만 유저 정보를 담기 때문에 명시적으로 파라미터에 Access Token 을 넘겨줌

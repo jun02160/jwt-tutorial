@@ -22,8 +22,8 @@ public class UserController {
      * - UserDto를 파라미터로 받아 UserService의 signup 메소드 호출
      */
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@Valid @RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.signup(userDto));
+    public BaseResponse<User> signup(@Valid @RequestBody UserDto userDto) {
+        return new BaseResponse<>(userService.signup(userDto));
     }
 
     /**

@@ -1,6 +1,7 @@
 package jjun.server.jwttutorial.controller;
 
 import jakarta.validation.Valid;
+import jjun.server.jwttutorial.config.BaseResponse;
 import jjun.server.jwttutorial.dto.LoginDto;
 import jjun.server.jwttutorial.dto.TokenDto;
 import jjun.server.jwttutorial.dto.TokenRequestDto;
@@ -36,6 +37,7 @@ public class AuthController {
 
         TokenDto jwt = authService.authenticate(loginDto);   // JWT Token 생성
 
+
         // Response Header 에 추가
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
@@ -48,7 +50,7 @@ public class AuthController {
      * - Access Token, Refresh Token String 을 담고 있는 TokenRequestDto 를 파라미터로 넘겨줌
      */
     @PostMapping("/reissue")
-    public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
-        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
+    public BaseResponse<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+        return new BaseResponse<>(authService.reissue(tokenRequestDto));
     }
 }

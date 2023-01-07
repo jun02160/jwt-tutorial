@@ -35,3 +35,7 @@ jwt:
   #echo 'silvernine-tech-spring-boot-jwt-tutorial-secret-silvernine-tech-spring-boot-jwt-tutorial-secret'|base64
   secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
 #  token-validity-in-seconds: 86400
+
+kakao:
+  key: 7adc3bca928d264e605607d6a64f2d98
+  redirect_uri: http://localhost:8080/oauth/login/kakao

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jjun.server.jwttutorial.dto.LoginDto;
 import jjun.server.jwttutorial.dto.TokenDto;
 import jjun.server.jwttutorial.dto.TokenRequestDto;
+import jjun.server.jwttutorial.dto.oauth.SignupRequestDto;
 import jjun.server.jwttutorial.entity.Account;
 import jjun.server.jwttutorial.entity.RefreshToken;
 import jjun.server.jwttutorial.jwt.TokenProvider;
@@ -26,6 +27,8 @@ public class AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    //== 일반 Form Login 토큰 발급 로직 ==//
 
     /**
      * 사용자 정보를 가져오는 메소드
@@ -56,13 +59,35 @@ public class AuthService {
 
         // 4. Refresh Token 저장
         RefreshToken refreshToken = RefreshToken.builder()
-                .key(authentication.getName())
+                .key(Long.valueOf(authentication.getName()))
                 .value(tokenDto.getRefreshToken())
                 .build();
 
         refreshTokenRepository.save(refreshToken);
 
         return tokenDto;
+    }
+
+    @Transactional
+    public TokenDto authenticate(String email) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow();
+        log.info("AuthService-login: 계정을 찾았습니다 {}", account);
+
+        // 토큰 발행
+        TokenDto tokenDto = tokenProvider.createToken(email);
+
+        // RefreshToken DB 에 저장
+        RefreshToken refreshToken = RefreshToken.builder()
+                .key(account.getAccountId())
+                .value(tokenDto.getRefreshToken())
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+        log.info("토큰 발급과 저장을 완료했습니다.");
+
+        return tokenDto;
+
     }
 
     /**
@@ -96,4 +121,14 @@ public class AuthService {
 
         return tokenDto;
     }
+
+    /**
+     * 회원가입 요청에 대해 Access Token 과 Refresh Token 을 방급하고, Refresh Token 을 리포지토리에 저장하는 메소드
+     */
+    public TokenDto oauthSignup(SignupRequestDto requestDto) {
+        Account account = requestDto.getAccount();
+        return tokenProvider.createToken(account.getEmail());
+    }
+
+
 }
